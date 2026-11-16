@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 
-VARIABLES = ("OPENAI_API_KEY", "HF_TOKEN")
+VARIABLES = ("OPENAI_API_KEY", "MLFLOW_TRACKING_URI", "DATABASE_URL")
 
 
 def main() -> int:
@@ -25,7 +25,7 @@ def main() -> int:
         print(f"{nombre}: {estado}")
 
     if sys.version_info < (3, 10) or not dentro_de_docker or faltantes:
-        print("Verificación pendiente: se requiere Python 3.10+, Docker y las dos variables.")
+        print("Verificación pendiente: se requiere Python 3.10+, Docker y las variables declaradas.")
         return 1
 
     print("Entorno validado correctamente.")

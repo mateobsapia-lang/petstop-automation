@@ -51,7 +51,7 @@ Dentro del contenedor podés iniciar `python demo_api.py &` y luego ejecutar las
 2. Elegí **Dev Containers: Reopen in Container** desde la paleta de comandos.
 3. En el terminal integrado ejecutá `python src/check_env.py`.
 
-La prueba muestra la versión de Python, comprueba que el proceso se ejecuta en Docker y verifica que se puede acceder a `OPENAI_API_KEY` y `HF_TOKEN`. Las variables están vacías en el entorno de desarrollo y sus valores nunca se imprimen. La prueba no hace llamadas a APIs.
+La prueba muestra la versión de Python, comprueba que el proceso se ejecuta en Docker y verifica que se puede acceder a `OPENAI_API_KEY`, `MLFLOW_TRACKING_URI` y `DATABASE_URL`. El entorno de desarrollo las define vacías y la prueba solo informa su estado.
 
 Para reproducir la misma comprobación desde la raíz con Docker CLI:
 
