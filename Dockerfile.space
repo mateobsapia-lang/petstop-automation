@@ -1,0 +1,27 @@
+# Preparación para Docker Spaces; validar el build y la URL antes de entregar el final.
+FROM python:3.12-slim-bookworm AS builder
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential cmake git libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /build
+COPY requirements-lock.txt ./
+RUN pip install --prefix=/install --no-cache-dir -r requirements-lock.txt
+ARG LLAMA_COMMIT=436d7e81ca593e294761428b4fe3d6cafef6800f
+RUN git init llama && cd llama && git remote add origin https://github.com/ggml-org/llama.cpp.git \
+    && git fetch --depth 1 origin ${LLAMA_COMMIT} && git checkout FETCH_HEAD \
+    && cmake -B build -DCMAKE_BUILD_TYPE=Release -DGGML_NATIVE=OFF -DBUILD_SHARED_LIBS=OFF \
+       -DLLAMA_BUILD_TESTS=OFF -DLLAMA_BUILD_EXAMPLES=OFF -DLLAMA_BUILD_SERVER=ON \
+    && cmake --build build --target llama-server -j 2
+
+FROM python:3.12-slim-bookworm
+RUN apt-get update && apt-get install -y --no-install-recommends git libgomp1 libssl3 \
+    && rm -rf /var/lib/apt/lists/* && useradd -m -u 1000 app
+COPY --from=builder /install /usr/local
+COPY --from=builder /build/llama/build/bin/llama-server /usr/local/bin/llama-server
+WORKDIR /app
+COPY --chown=app:app . .
+RUN mkdir -p data && chown app:app data
+USER app
+ENV HOME=/home/app PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 \
+    MLFLOW_DISABLE_AGENT_HINT=1 PREFECT_SERVER_ANALYTICS_ENABLED=false
+EXPOSE 7860
+CMD ["python", "space_bootstrap.py"]

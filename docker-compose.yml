@@ -1,0 +1,55 @@
+services:
+  ai_agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.runtime
+    ports: ["127.0.0.1:8501:8501"]
+    env_file: .env
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow_ui:5000
+      LOCAL_LLM_URL: http://inference_server:8088/v1
+      PREFECT_API_URL: http://prefect:4200/api
+    volumes: [agent_data:/app/data]
+    networks: [petstop]
+    mem_limit: 2g
+    cpus: 2
+    depends_on: [mlflow_ui, inference_server, prefect]
+  mlflow_ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.runtime
+    command: ["mlflow", "server", "--host", "0.0.0.0", "--port", "5000", "--workers", "1",
+              "--backend-store-uri", "sqlite:////app/data/mlflow.db",
+              "--artifacts-destination", "/app/data/artifacts",
+              "--allowed-hosts", "mlflow_ui:5000,localhost:5000,127.0.0.1:5000"]
+    volumes: [tracking_data:/app/data]
+    networks: [petstop]
+    mem_limit: 2g
+    cpus: 1
+  inference_server:
+    image: ghcr.io/ggml-org/llama.cpp:server
+    command: ["-m", "/models/qwen.gguf", "--host", "0.0.0.0", "--port", "8088",
+              "--ctx-size", "8192", "--alias", "qwen2.5-1.5b-instruct"]
+    volumes: ["${PETSTOP_MODEL_DIR}:/models:ro"]
+    networks: [petstop]
+    mem_limit: 4g
+    cpus: 4
+  prefect:
+    build:
+      context: .
+      dockerfile: Dockerfile.runtime
+    command: ["prefect", "server", "start", "--host", "0.0.0.0"]
+    environment:
+      PREFECT_HOME: /app/data/prefect
+      PREFECT_UI_STATIC_DIRECTORY: /app/data/prefect/ui
+      PREFECT_SERVER_ANALYTICS_ENABLED: "false"
+    volumes: [prefect_data:/app/data]
+    networks: [petstop]
+    mem_limit: 2g
+    cpus: 2
+networks:
+  petstop:
+volumes:
+  agent_data:
+  tracking_data:
+  prefect_data:

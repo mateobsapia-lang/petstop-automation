@@ -86,3 +86,90 @@ docker run --rm --env-file .env.example --mount "type=bind,source=$PWD,target=/w
 ```
 
 `.env.example` enumera los nombres para futuras integraciones. Git y el contexto de Docker excluyen `.env` y los archivos de datos locales.
+
+## Motor, agentes y monitoreo
+
+El proyecto reúne la ingesta de PetStop, el registro de modelos, las consultas al manual y el control de las respuestas. Los datos de ventas son de prueba. El análisis de viviendas usa California Housing de scikit-learn.
+
+### Abrir la aplicación
+
+1. Copiá `.env.example` a `.env` y dejá las claves vacías para la prueba local.
+2. Descargá `qwen2.5-1.5b-instruct-q4_k_m.gguf` desde el repositorio oficial Qwen/Qwen2.5-1.5B-Instruct-GGUF. Guardalo como `qwen.gguf` en una carpeta de tu equipo.
+3. Indicá esa carpeta y levantá los servicios:
+
+```powershell
+$env:PETSTOP_MODEL_DIR = "C:/ruta/modelos"
+docker compose up --build -d
+```
+
+Abrí http://127.0.0.1:8501. El primer inicio necesita descargar las imágenes y cargar el modelo. La interfaz consulta el manual; cada respuesta pasa por Prefect y queda registrada en MLflow. La interfaz también muestra drift, auditoría y el control humano. Los puertos de MLflow, Prefect y el modelo quedan dentro de Docker.
+
+Para probar la consulta desde la consola:
+
+```sh
+docker compose exec ai_agent python inferencia.py
+```
+
+Para generar el modelo inicial dentro del contenedor:
+
+```sh
+docker compose exec -d ai_agent python demo_api.py
+docker compose exec -e PETSTOP_API_URL=http://127.0.0.1:8765 ai_agent python pipeline_trazable.py
+```
+
+### Qué hace cada archivo
+
+| Archivo | Función |
+|---|---|
+| `pipeline_trazable.py` | Ingesta, entrenamiento de prueba, métricas y registro de modelo. |
+| `inferencia.py` | Recuperación FAISS, contexto del manual, salida Pydantic y alerta de revisión. |
+| `agente_mlops_checkpoint4.py` | Agente LangGraph: consulta métricas, limpia una copia de datos y pide aprobación antes de la promoción simulada. |
+| `multiagente.py` | Coordinador, ejecución y revisión en AG2. Guarda código generado, gráfico y conversación. |
+| `checkpoint_n8n_Sapia_Mateo.json` | Webhook, condición de confianza y aviso al laboratorio. |
+| `audit.py` | Registro acumulativo en SQLite, hashes encadenados y bloqueo de UPDATE/DELETE. |
+| `monitoring.py` | Prueba de drift, últimas cinco inferencias y ficha de gobernanza. |
+| `dashboard.py` | Consultas y seguimiento desde Streamlit. |
+
+### Revisión humana
+
+Cada pausa de LangGraph se guarda por `thread_id` en SQLite. La aprobación debe corresponder a una persona que haya revisado la solicitud.
+
+```sh
+python agente_mlops_checkpoint4.py --thread prueba-1 --question "Promové el modelo PetStopReposicionLaboratorio"
+python agente_mlops_checkpoint4.py --thread prueba-1 --decision approve
+# Para rechazar: --decision reject
+```
+
+La prueba escribe una promoción simulada; no cambia el registro productivo de MLflow ni ejecuta una compra. Las métricas y el dataset están limitados al laboratorio.
+
+### Controles y límites
+
+- Los reintentos de ingesta están en Prefect; los errores previos al guardado no generan una captura incompleta.
+- La salida del motor se valida con Pydantic y sus fuentes se limitan a los fragmentos recuperados. Si no hay fuentes, se requiere revisión y se registra una alerta.
+- La búsqueda usa una representación léxica local de 512 dimensiones. No se presenta como un modelo de embeddings semánticos.
+- Cada inferencia guarda prompt, parámetros, costo de API y latencia en MLflow. El costo de API local es cero; no se cuantifica el consumo del equipo.
+- SQLite bloquea UPDATE y DELETE y encadena los hashes. Un administrador del equipo todavía puede cambiar el archivo: no es almacenamiento externo inmutable.
+- La promoción requiere una aprobación explícita. Un operador puede detener los flows o bajar los servicios con `docker compose down`.
+- Los volúmenes conservan los datos después de `down` y `up`. `down -v` elimina los volúmenes y no se usa en las pruebas de persistencia.
+- `requirements-lock.txt` conserva las versiones verificadas en Linux. El modelo GGUF se monta por separado y no contiene claves.
+- El modelo local puede equivocarse; las respuestas no autorizan compras ni reemplazan una revisión del equipo.
+
+### Alertas n8n
+
+Importá el JSON en n8n y configurá una credencial SMTP propia. El archivo conserva la referencia `petstopSMTP`, que se usó con un servidor de correo local de laboratorio. La prueba no envió correos a personas reales.
+
+```json
+{"confianza": 0.45, "resumen": "Revisar resultado"}
+```
+
+El POST a `/webhook/petstop-review` genera un correo si la confianza es menor a 0,70. Una confianza mayor o igual se registra sin avisar. Ambos caminos se probaron con ejecuciones exitosas y un único correo recibido en el servidor local.
+
+### Publicación
+
+La aplicación funciona localmente con Docker. La publicación cloud y la comprobación de su URL pública siguen pendientes. No se presenta la dirección local como una aplicación publicada.
+
+Fuentes: [Qwen GGUF](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF), [Docker Spaces](https://huggingface.co/docs/hub/spaces-sdks-docker), [criterios de riesgo y transparencia](https://ai-act-service-desk.ec.europa.eu/en/ai-act/faq/what-are-obligations-high-risk-transparency-risk-and-minimal-risk-ai-systems).
+
+Para preparar Docker Spaces se agregaron `Dockerfile.space` y `space_bootstrap.py`. Son la configuración de despliegue pendiente de construir y verificar, no una publicación completada. En el repositorio del Space se usa `Dockerfile.space` como `Dockerfile` y un encabezado README con `sdk: docker` y `app_port: 7860`. Se publica solo Streamlit; los servicios internos escuchan en 127.0.0.1.
+
+El arranque descarga Qwen desde su repositorio oficial, inicia los servicios y genera el modelo del laboratorio. El almacenamiento gratuito del Space es efímero: una reconstrucción puede borrar el registro. Los volúmenes persistentes verificados corresponden a Docker Compose local; para conservar un historial cloud se necesita definir y comprobar almacenamiento externo antes de usarlo fuera de la demostración.

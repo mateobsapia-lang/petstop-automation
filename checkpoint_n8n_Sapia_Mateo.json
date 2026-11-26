@@ -1,0 +1,172 @@
+{
+  "id": "petstopAlerts",
+  "name": "PetStop - alertas de análisis",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  },
+  "nodes": [
+    {
+      "id": "webhook",
+      "name": "Resultado del agente",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "petstop-review",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "petstop-review",
+        "responseMode": "onReceived",
+        "options": {}
+      }
+    },
+    {
+      "id": "decision",
+      "name": "Requiere revisión",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "confidence",
+              "leftValue": "={{ $json.body.confianza }}",
+              "rightValue": 0.7,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "message",
+      "name": "Preparar aviso",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        -100
+      ],
+      "parameters": {
+        "jsCode": "const p=$input.first().json.body;\nreturn [{json:{mensaje:`PetStop necesita revisión. Confianza: ${p.confianza}. ${p.resumen}`}}];"
+      }
+    },
+    {
+      "id": "email",
+      "name": "Avisar al laboratorio",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        720,
+        -100
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "petstopSMTP",
+          "name": "SMTP local PetStop"
+        }
+      },
+      "parameters": {
+        "fromEmail": "petstop@localhost",
+        "toEmail": "revision@localhost",
+        "subject": "PetStop · análisis para revisar",
+        "emailFormat": "text",
+        "text": "={{ $json.mensaje }}",
+        "options": {
+          "appendAttribution": false,
+          "allowUnauthorizedCerts": false
+        }
+      }
+    },
+    {
+      "id": "silent",
+      "name": "Registro silencioso",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        120
+      ],
+      "parameters": {
+        "jsCode": "return [{json:{estado:'registrado',confianza:$input.first().json.body.confianza,resumen:$input.first().json.body.resumen}}];"
+      }
+    },
+    {
+      "id": "note",
+      "name": "Descripción",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -50,
+        -300
+      ],
+      "parameters": {
+        "content": "## PetStop · revisión de resultados\nPOST recibe confianza y resumen.\nConfianza menor a 0,70 envía un correo de laboratorio.\nEl resto queda registrado sin notificación.\nSMTP local de prueba, sin destinatarios externos.",
+        "height": 220,
+        "width": 780
+      }
+    }
+  ],
+  "connections": {
+    "Resultado del agente": {
+      "main": [
+        [
+          {
+            "node": "Requiere revisión",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Requiere revisión": {
+      "main": [
+        [
+          {
+            "node": "Preparar aviso",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Registro silencioso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar aviso": {
+      "main": [
+        [
+          {
+            "node": "Avisar al laboratorio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
