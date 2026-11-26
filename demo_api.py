@@ -33,7 +33,7 @@ class DemoHandler(BaseHTTPRequestHandler):
         self.end_headers()
         try:
             self.wfile.write(payload)
-        except (BrokenPipeError, ConnectionResetError):
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
             return
 
 

@@ -1,6 +1,6 @@
 # PetStop Automation
 
-Mateo Sapia · AI Automation para Data Scientist · Checkpoint 2
+Mateo Sapia · AI Automation para Data Scientist · Checkpoint 3
 
 PetStop descarga ventas e inventario en paralelo y guarda una captura JSON para el análisis de reposición. La API de práctica devuelve pedidos, productos, unidades y stock ficticios de una sucursal. Se puede reproducir en la misma máquina sin cuenta ni credenciales.
 
@@ -46,6 +46,31 @@ docker run --rm -it --mount "type=bind,source=$PWD,target=/workspaces/petstop-au
 Dentro del contenedor podés iniciar `python demo_api.py &` y luego ejecutar las dos comparaciones.
 
 ## Validar desde VS Code
+
+## Orquestación con Prefect
+
+Con las dependencias instaladas, iniciá el servidor local en una terminal.
+
+```sh
+prefect server start --host 127.0.0.1
+```
+
+Dejá la API de práctica en otra terminal con `python demo_api.py`.
+En PowerShell, desde la raíz del proyecto, ejecutá el flujo.
+
+```powershell
+$env:PREFECT_API_URL = "http://127.0.0.1:4200/api"
+python pipeline.py
+```
+
+El dashboard está en http://127.0.0.1:4200. El flujo separa ingesta,
+validación y persistencia en tres tareas. La ingesta usa dos reintentos
+de Prefect con esperas exponenciales y una sola solicitud por intento
+del cliente. Cada ejecución completa escribe un JSON en `data/runs/`
+con fecha UTC e identificador de ejecución. Ante un fallo previo al guardado,
+se conserva el historial de capturas completas.
+
+### Comprobación del entorno
 
 1. Con Docker en ejecución y la extensión **Dev Containers**, abrí esta carpeta en VS Code.
 2. Elegí **Dev Containers: Reopen in Container** desde la paleta de comandos.
