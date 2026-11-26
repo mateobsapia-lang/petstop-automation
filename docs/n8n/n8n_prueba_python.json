@@ -1,0 +1,36 @@
+{
+  "pruebas": [
+    {
+      "entrada": {
+        "confianza": 0.45,
+        "resumen": "La correlación entre ingreso y valor mediano de vivienda es positiva: r=0.688075, n=20640."
+      },
+      "http_status": 200,
+      "respuesta": {
+        "message": "Workflow was started"
+      }
+    },
+    {
+      "entrada": {
+        "confianza": 0.95,
+        "resumen": "La correlación entre ingreso y valor mediano de vivienda es positiva: r=0.688075, n=20640."
+      },
+      "http_status": 200,
+      "respuesta": {
+        "message": "Workflow was started"
+      }
+    }
+  ],
+  "ejecuciones": [
+    [
+      4,
+      "success",
+      "petstopAlerts"
+    ],
+    [
+      3,
+      "success",
+      "petstopAlerts"
+    ]
+  ]
+}

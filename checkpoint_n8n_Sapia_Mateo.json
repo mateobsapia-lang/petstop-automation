@@ -1,12 +1,11 @@
 {
+  "updatedAt": "2026-11-26T14:34:40.320Z",
+  "createdAt": "2026-11-26T14:34:40.320Z",
   "id": "petstopAlerts",
   "name": "PetStop - alertas de análisis",
-  "active": false,
-  "settings": {
-    "executionOrder": "v1",
-    "saveDataSuccessExecution": "all",
-    "saveDataErrorExecution": "all"
-  },
+  "description": null,
+  "active": true,
+  "isArchived": false,
   "nodes": [
     {
       "id": "webhook",
@@ -168,5 +167,24 @@
         ]
       ]
     }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all"
+  },
+  "staticData": null,
+  "meta": null,
+  "nodeGroups": [],
+  "pinData": null,
+  "versionId": "40e01d20-320e-4ead-b2f2-0e29624ac188",
+  "activeVersionId": "40e01d20-320e-4ead-b2f2-0e29624ac188",
+  "versionCounter": 1,
+  "triggerCount": 1,
+  "sourceWorkflowId": null,
+  "tags": [],
+  "versionMetadata": {
+    "name": null,
+    "description": null
   }
 }

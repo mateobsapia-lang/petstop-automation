@@ -173,3 +173,13 @@ Fuentes: [Qwen GGUF](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF), [D
 Para preparar Docker Spaces se agregaron `Dockerfile.space` y `space_bootstrap.py`. Son la configuración de despliegue pendiente de construir y verificar, no una publicación completada. En el repositorio del Space se usa `Dockerfile.space` como `Dockerfile` y un encabezado README con `sdk: docker` y `app_port: 7860`. Se publica solo Streamlit; los servicios internos escuchan en 127.0.0.1.
 
 El arranque descarga Qwen desde su repositorio oficial, inicia los servicios y genera el modelo del laboratorio. El almacenamiento gratuito del Space es efímero: una reconstrucción puede borrar el registro. Los volúmenes persistentes verificados corresponden a Docker Compose local; para conservar un historial cloud se necesita definir y comprobar almacenamiento externo antes de usarlo fuera de la demostración.
+
+### Evidencia de la entrega 8
+
+El JSON se exportó desde la instancia n8n del laboratorio. Se verificaron dos POST desde Python con `requests.post()`: confianza 0,45 genera el aviso y confianza 0,95 toma el registro silencioso. La confianza de estas pruebas es un valor controlado para comprobar la condición, no una probabilidad estimada por el modelo.
+
+- [Ejecución con aviso](docs/n8n/n8n_rama_alerta.png)
+- [Ejecución silenciosa](docs/n8n/n8n_rama_silenciosa.png)
+- [Entradas y resultados de la prueba Python](docs/n8n/n8n_prueba_python.json)
+
+Las capturas muestran las ejecuciones 1 y 2; la repetición desde Python creó las ejecuciones 3 y 4, también exitosas. El export conserva la referencia SMTP, sin su contraseña. Al importarlo, hay que seleccionar una credencial SMTP de la instancia de destino.
