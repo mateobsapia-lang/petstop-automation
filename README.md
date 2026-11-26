@@ -183,3 +183,21 @@ El JSON se exportó desde la instancia n8n del laboratorio. Se verificaron dos P
 - [Entradas y resultados de la prueba Python](docs/n8n/n8n_prueba_python.json)
 
 Las capturas muestran las ejecuciones 1 y 2; la repetición desde Python creó las ejecuciones 3 y 4, también exitosas. El export conserva la referencia SMTP, sin su contraseña. Al importarlo, hay que seleccionar una credencial SMTP de la instancia de destino.
+
+### Despliegue en Streamlit Community Cloud
+
+La cuenta de Hugging Face consultada el 26/11/2026 exige un plan pago para crear Docker o Gradio Spaces. No se contrató un plan. Se preparó una entrada alternativa en `community/app.py` para Community Cloud.
+
+Este perfil conserva Prefect, LangGraph y MLflow. MLflow usa SQLite dentro del mismo proceso, sin un servidor web adicional; así se reduce el consumo de memoria. Al iniciar se registra el modelo y se generan cinco consultas de ejemplo si todavía no existen. El binario Linux de llama.cpp se descarga de la release `runtime-2026-11-26` de este repositorio y se verifica con SHA256. No usa una API de inferencia paga ni necesita claves.
+
+Configuración:
+
+- Repositorio: `mateobsapia-lang/petstop-automation`
+- Rama: `main`
+- Entrada: `community/app.py`
+- Python: `3.12`
+- Dependencias: `community/requirements.txt` y `packages.txt`
+
+La entrada se probó en Linux con límite de 2.500 MB y 2 CPU: entrenamiento, cinco inferencias FINISHED y consulta de métricas desde la interfaz. La publicación y la comprobación del enlace externo siguen pendientes. El primer inicio tarda mientras se descargan el binario y el modelo. Los archivos locales del proveedor pueden perderse en un reinicio; la persistencia entre reinicios verificada con volúmenes corresponde al perfil Docker Compose.
+
+Referencia: https://docs.streamlit.io/deploy/streamlit-community-cloud
