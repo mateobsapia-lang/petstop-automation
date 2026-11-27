@@ -45,8 +45,6 @@ docker run --rm -it --mount "type=bind,source=$PWD,target=/workspaces/petstop-au
 
 Dentro del contenedor podés iniciar `python demo_api.py &` y luego ejecutar las dos comparaciones.
 
-## Validar desde VS Code
-
 ## Orquestación con Prefect
 
 Con las dependencias instaladas, iniciá el servidor local en una terminal.
@@ -164,35 +162,17 @@ Importá el JSON en n8n y configurá una credencial SMTP propia. El archivo cons
 
 El POST a `/webhook/petstop-review` genera un correo si la confianza es menor a 0,70. Una confianza mayor o igual se registra sin avisar. Ambos caminos se probaron con ejecuciones exitosas y un único correo recibido en el servidor local.
 
-### Publicación
+### Aplicación pública
 
-Aplicación pública: https://petstop-mateo-sapia.streamlit.app/
+https://petstop-mateo-sapia.streamlit.app/
 
-Se verificaron una consulta al manual y la consulta de métricas del agente desde una sesión sin iniciar sesión en Streamlit. La ejecución usa Streamlit Community Cloud; el entorno Docker Compose queda disponible para reproducirla localmente.
+Se verificaron el acceso sin iniciar sesión, la consulta al manual y la consulta de métricas del agente. Para la pregunta sobre una reserva, el motor respondió **24 horas** y citó `manual-1`. El agente obtuvo la versión 1 del modelo, con f1 de 0,826923 y roc_auc de 0,970761.
 
-Fuentes: [Qwen GGUF](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF), [Docker Spaces](https://huggingface.co/docs/hub/spaces-sdks-docker), [criterios de riesgo y transparencia](https://ai-act-service-desk.ec.europa.eu/en/ai-act/faq/what-are-obligations-high-risk-transparency-risk-and-minimal-risk-ai-systems).
+La aplicación corre en Streamlit Community Cloud con Python 3.12 y la entrada `community/app.py`. Mantiene Prefect y LangGraph; MLflow usa SQLite integrado para reducir memoria. El perfil se probó en Linux con 2 CPU y un límite de 2.500 MB. No usa claves de proveedores de inferencia ni un plan pago.
 
-Para preparar Docker Spaces se agregaron `Dockerfile.space` y `space_bootstrap.py`. Son la configuración de despliegue pendiente de construir y verificar, no una publicación completada. En el repositorio del Space se usa `Dockerfile.space` como `Dockerfile` y un encabezado README con `sdk: docker` y `app_port: 7860`. Se publica solo Streamlit; los servicios internos escuchan en 127.0.0.1.
+El inicio descarga Qwen desde su repositorio oficial y el ejecutable de llama.cpp desde la release `runtime-2026-11-26` de este repositorio. El ejecutable se compiló desde el commit oficial `436d7e81ca593e294761428b4fe3d6cafef6800f` y su descarga se verifica con SHA256. El proveedor usa PyArrow 24.0.0; se fijó la misma versión en `requirements-lock.txt`.
 
-El arranque descarga Qwen desde su repositorio oficial, inicia los servicios y genera el modelo del laboratorio. El almacenamiento gratuito del Space es efímero: una reconstrucción puede borrar el registro. Los volúmenes persistentes verificados corresponden a Docker Compose local; para conservar un historial cloud se necesita definir y comprobar almacenamiento externo antes de usarlo fuera de la demostración.
-
-### Evidencia de la entrega 8
-
-El JSON se exportó desde la instancia n8n del laboratorio. Se verificaron dos POST desde Python con `requests.post()`: confianza 0,45 genera el aviso y confianza 0,95 toma el registro silencioso. La confianza de estas pruebas es un valor controlado para comprobar la condición, no una probabilidad estimada por el modelo.
-
-- [Ejecución con aviso](docs/n8n/n8n_rama_alerta.png)
-- [Ejecución silenciosa](docs/n8n/n8n_rama_silenciosa.png)
-- [Entradas y resultados de la prueba Python](docs/n8n/n8n_prueba_python.json)
-
-Las capturas muestran las ejecuciones 1 y 2; la repetición desde Python creó las ejecuciones 3 y 4, también exitosas. El export conserva la referencia SMTP, sin su contraseña. Al importarlo, hay que seleccionar una credencial SMTP de la instancia de destino.
-
-### Despliegue en Streamlit Community Cloud
-
-La cuenta de Hugging Face consultada el 26/11/2026 exige un plan pago para crear Docker o Gradio Spaces. No se contrató un plan. Se preparó una entrada alternativa en `community/app.py` para Community Cloud.
-
-Este perfil conserva Prefect, LangGraph y MLflow. MLflow usa SQLite dentro del mismo proceso, sin un servidor web adicional; así se reduce el consumo de memoria. Al iniciar se registra el modelo y se generan cinco consultas de ejemplo si todavía no existen. El binario Linux de llama.cpp se descarga de la release `runtime-2026-11-26` de este repositorio y se verifica con SHA256. No usa una API de inferencia paga ni necesita claves.
-
-Configuración:
+Para reproducir el perfil publicado:
 
 - Repositorio: `mateobsapia-lang/petstop-automation`
 - Rama: `main`
@@ -200,21 +180,31 @@ Configuración:
 - Python: `3.12`
 - Dependencias: `community/requirements.txt` y `packages.txt`
 
-La entrada se probó en Linux con límite de 2.500 MB y 2 CPU: entrenamiento, cinco inferencias FINISHED y consulta de métricas desde la interfaz. La aplicación quedó publicada y se comprobó su acceso sin sesión, la respuesta de reserva de 24 horas y las métricas del agente (f1=0,826923; roc_auc=0,970761). El primer inicio tarda mientras se descargan el binario y el modelo. Los archivos locales del proveedor pueden perderse en un reinicio; la persistencia entre reinicios verificada con volúmenes corresponde al perfil Docker Compose.
+El servicio gratuito puede entrar en reposo y el primer inicio necesita unos minutos para preparar los servicios y el modelo. El historial cloud reside en disco local del proveedor y puede reiniciarse al reconstruir la aplicación. La persistencia entre reinicios demostrada en el checkpoint 9 corresponde a los volúmenes de Docker Compose. `Dockerfile.space` permite construir el perfil en un único contenedor; `Dockerfile.runtime` y `docker-compose.yml` mantienen la separación de servicios del checkpoint 9.
 
-Referencia: https://docs.streamlit.io/deploy/streamlit-community-cloud
-
-
-### Evidencias y entregables
+### Evidencias de publicación
 
 - [Consulta pública sin sesión](docs/publicacion/cloud_consulta_sin_sesion.png)
 - [Agente público sin sesión](docs/publicacion/cloud_agente_sin_sesion.png)
-- [Informe del motor de inferencia](docs/checkpoints/5/checkpoint_langchain_motor_Mateo_Sapia.json)
-- [Informe multiagente](docs/checkpoints/7/Checkpoint_Multiagente_Mateo_Sapia.pdf)
-- [Informe Docker](docs/checkpoints/9/Checkpoint_Docker_Mateo_Sapia.pdf)
-- [Informe de observabilidad](docs/checkpoints/10/Checkpoint_Observabilidad_Mateo_Sapia.pdf)
-- [Datos de observabilidad y auditoría](docs/checkpoints/10/checkpoint_observabilidad_Mateo_Sapia.json)
+- [Datos de la verificación](docs/publicacion/verificacion_publica.json)
 
-El despliegue se configuró con Python 3.12. El proveedor sustituyó PyArrow 26.0.1 por 24.0.0; se fija esa misma versión en el archivo de dependencias. La verificación pública se realizó con 24.0.0.
+### Alertas n8n - entrega 8
 
-El servicio gratuito puede entrar en reposo y necesita unos minutos para volver a preparar el modelo. El historial cloud se guarda en disco local del proveedor y puede reiniciarse al reconstruir la aplicación. La prueba de persistencia con volúmenes del checkpoint 9 corresponde a Docker Compose. No se contrató un plan pago ni se cargaron claves de proveedores de inferencia.
+[Workflow exportado](checkpoint_n8n_Sapia_Mateo.json). Sus dos rutas se probaron por HTTP y se repitieron desde Python con `requests.post()`.
+
+- [Ejecución con aviso](docs/n8n/n8n_rama_alerta.png)
+- [Ejecución silenciosa](docs/n8n/n8n_rama_silenciosa.png)
+- [Entradas y resultados de la prueba Python](docs/n8n/n8n_prueba_python.json)
+
+Las capturas muestran las ejecuciones 1 y 2; la repetición desde Python creó las ejecuciones 3 y 4, también exitosas. El valor de confianza de estas pruebas es controlado para verificar la condición, no una probabilidad estimada por el modelo. El export conserva la referencia SMTP sin su contraseña. Al importarlo, hay que seleccionar una credencial SMTP de la instancia de destino.
+
+### Entregables de los checkpoints
+
+- [Informe del motor de inferencia - 5](docs/checkpoints/5/checkpoint_langchain_motor_Mateo_Sapia.json)
+- [Script del agente - 6](agente_mlops_checkpoint4.py)
+- [Informe multiagente - 7](docs/checkpoints/7/Checkpoint_Multiagente_Mateo_Sapia.pdf)
+- [Informe Docker - 9](docs/checkpoints/9/Checkpoint_Docker_Mateo_Sapia.pdf)
+- [Informe de observabilidad - 10](docs/checkpoints/10/Checkpoint_Observabilidad_Mateo_Sapia.pdf)
+- [Datos de observabilidad y auditoría - 10](docs/checkpoints/10/checkpoint_observabilidad_Mateo_Sapia.json)
+
+Referencias: [Qwen GGUF](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF), [Streamlit Community Cloud](https://docs.streamlit.io/deploy/streamlit-community-cloud), [criterios de riesgo y transparencia](https://ai-act-service-desk.ec.europa.eu/en/ai-act/faq/what-are-obligations-high-risk-transparency-risk-and-minimal-risk-ai-systems).
