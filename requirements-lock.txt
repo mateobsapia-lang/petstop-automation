@@ -123,7 +123,7 @@ prometheus_client==0.26.0
 propcache==0.5.4
 protobuf==7.36.2
 py-key-value-aio==0.5.0
-pyarrow==26.0.1
+pyarrow==24.0.0
 pyasn1==0.6.5
 pyasn1_modules==0.4.2
 pycparser==3.12

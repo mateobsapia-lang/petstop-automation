@@ -1,0 +1,33 @@
+{
+  "autor": "Mateo Sapia",
+  "modelo": "qwen2.5-1.5b-instruct",
+  "configuracion": {
+    "chunk_size": 400,
+    "chunk_overlap": 50,
+    "retrieval_k": 3,
+    "vector_store": "FAISS",
+    "embedding": "HashingVectorizer léxico de 512 dimensiones",
+    "motivo_chunking": "Manual breve: fragmentos de 400 caracteres con 50 de solapamiento conservan contexto entre secciones."
+  },
+  "pregunta_ejemplo": "¿Cuánto dura una reserva confirmada?",
+  "JSON_resultado": {
+    "respuesta": "Una reserva confirmada se mantiene durante 24 horas.",
+    "fuentes": [],
+    "requiere_revision": true
+  },
+  "trazabilidad_MLflow": {
+    "run_id": "615806a1bd114e1295a203b7d6cffd59",
+    "status": "FINISHED",
+    "params": {
+      "chunk_size": "400",
+      "model_name": "qwen2.5-1.5b-instruct",
+      "retrieval_k": "3",
+      "temperature": "0"
+    },
+    "metrics": {
+      "latency_seconds": 5.260357800027123,
+      "api_cost_usd": 0.0
+    }
+  },
+  "validacion_fidelidad": "Contexto limitado al manual, fuentes restringidas por esquema, PydanticOutputParser y revisión obligatoria si no se citan fuentes. Esto reduce riesgos, pero no prueba exactitud semántica; se revisaron cinco preguntas, incluida una sin información."
+}

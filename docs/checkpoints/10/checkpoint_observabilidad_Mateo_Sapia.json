@@ -1,0 +1,127 @@
+{
+  "autor": "Mateo Sapia",
+  "drift": {
+    "data_kind": "synthetic",
+    "n_reference": 600,
+    "n_production": 600,
+    "threshold_ks": 0.2,
+    "features": [
+      {
+        "feature": "stock",
+        "ks": 0.0,
+        "p_value": 1.0,
+        "alert": false
+      },
+      {
+        "feature": "units_7d",
+        "ks": 0.26833333333333337,
+        "p_value": 2.1042608203144176e-19,
+        "alert": true
+      },
+      {
+        "feature": "lead_days",
+        "ks": 0.0,
+        "p_value": 1.0,
+        "alert": false
+      }
+    ]
+  },
+  "auditoria": [
+    {
+      "Agent_Action": "Una reserva confirmada se mantiene durante 24 horas.",
+      "Human_Override_Flag": false,
+      "Input_Hash": "3571b0d742e905f2353b45a0bafca59a18a7ad475aa51b77eec26a2fc02a0e2a",
+      "Model_Version": "qwen2.5-1.5b-instruct",
+      "Timestamp": "2026-11-26T14:35:45.822223+00:00",
+      "fuentes": [],
+      "latency_seconds": 5.260357800027123,
+      "mlflow_run_id": "615806a1bd114e1295a203b7d6cffd59",
+      "pregunta": "¿Cuánto dura una reserva confirmada?",
+      "requiere_revision": true,
+      "respuesta": "Una reserva confirmada se mantiene durante 24 horas.",
+      "Previous_Hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "Event_Hash": "cd4eed8ee3aaf78e38719ed2fc5661774a903889f7385b0f9e16686c7cffbe13"
+    },
+    {
+      "Agent_Action": "El pago se realiza en la sucursal al retirar.",
+      "Human_Override_Flag": false,
+      "Input_Hash": "f8152e91cefa7a3d1f2225eeda49fd8da003837854cb4c3fd6ba877be93b707f",
+      "Model_Version": "qwen2.5-1.5b-instruct",
+      "Timestamp": "2026-11-26T14:35:49.290633+00:00",
+      "fuentes": [
+        "manual-1"
+      ],
+      "latency_seconds": 2.733752900006948,
+      "mlflow_run_id": "03b1eeaa3e8e44ac9b1e4ab02aba2d20",
+      "pregunta": "¿Dónde se paga el pedido?",
+      "requiere_revision": false,
+      "respuesta": "El pago se realiza en la sucursal al retirar.",
+      "Previous_Hash": "cd4eed8ee3aaf78e38719ed2fc5661774a903889f7385b0f9e16686c7cffbe13",
+      "Event_Hash": "6d25411e3fc7caa3f1698db935447fe4826841cfc2d6f5f6f13991207d02b7c1"
+    },
+    {
+      "Agent_Action": "No, no se puede comprar automáticamente al proveedor. La sucursal revisa el stock antes de confirmar.",
+      "Human_Override_Flag": false,
+      "Input_Hash": "dd4c8b7c80338028c931ef7834c777de33de86c3de813e3eb2efd49c0ec9b80e",
+      "Model_Version": "qwen2.5-1.5b-instruct",
+      "Timestamp": "2026-11-26T14:35:52.379210+00:00",
+      "fuentes": [
+        "manual-1",
+        "manual-3",
+        "manual-4"
+      ],
+      "latency_seconds": 2.5405440000176895,
+      "mlflow_run_id": "02fe85511e834703afbe72dd0010cd5a",
+      "pregunta": "¿Se puede comprar automáticamente al proveedor?",
+      "requiere_revision": false,
+      "respuesta": "No, no se puede comprar automáticamente al proveedor. La sucursal revisa el stock antes de confirmar.",
+      "Previous_Hash": "6d25411e3fc7caa3f1698db935447fe4826841cfc2d6f5f6f13991207d02b7c1",
+      "Event_Hash": "5209ede1e71a364d90967cf5d3517b25b1db73505b56a97c6b4f529c3a8eafab"
+    },
+    {
+      "Agent_Action": "El equipo de la sucursal revisa stock antes de confirmar.",
+      "Human_Override_Flag": false,
+      "Input_Hash": "66d33bc76c5ac6d97c697c3bece1dd28183f5fc25706319c861b27b87f356078",
+      "Model_Version": "qwen2.5-1.5b-instruct",
+      "Timestamp": "2026-11-26T14:35:55.945612+00:00",
+      "fuentes": [],
+      "latency_seconds": 2.9688948999973945,
+      "mlflow_run_id": "6342ffe3872d4e12a41cc94c502c5d83",
+      "pregunta": "¿Qué hay que revisar antes de confirmar stock?",
+      "requiere_revision": true,
+      "respuesta": "El equipo de la sucursal revisa stock antes de confirmar.",
+      "Previous_Hash": "5209ede1e71a364d90967cf5d3517b25b1db73505b56a97c6b4f529c3a8eafab",
+      "Event_Hash": "a98e2daf8e5f500b7c824d98bd2012ed00b7b17de0fad45f7d9c1dae0a57c93d"
+    },
+    {
+      "Agent_Action": "No está disponible",
+      "Human_Override_Flag": false,
+      "Input_Hash": "0efe147ef11217ade2f7c49831a1cc9b348e75895c5bf639cd204cfd92aaacde",
+      "Model_Version": "qwen2.5-1.5b-instruct",
+      "Timestamp": "2026-11-26T14:36:00.235715+00:00",
+      "fuentes": [],
+      "latency_seconds": 1.8998235999897588,
+      "mlflow_run_id": "bbcec24e0baf47bf960c4e367cf2b7c9",
+      "pregunta": "¿Cuál es el precio del proveedor?",
+      "requiere_revision": true,
+      "respuesta": "No está disponible",
+      "Previous_Hash": "a98e2daf8e5f500b7c824d98bd2012ed00b7b17de0fad45f7d9c1dae0a57c93d",
+      "Event_Hash": "67186faade864319b6392cbf9ea39df5946cbeb37659f7f9ba92b613407ea175"
+    }
+  ],
+  "controles_append_only": {
+    "UPDATE events SET payload=payload": "append-only: UPDATE bloqueado",
+    "DELETE FROM events": "append-only: DELETE bloqueado"
+  },
+  "limite_integridad": "Triggers SQL bloquean UPDATE y DELETE y cada evento encadena hashes. Un administrador con acceso al archivo aún puede alterarlo; no es almacenamiento WORM externo.",
+  "gobernanza": {
+    "use_case": "Asistente de consultas operativas y propuestas de reposición de PetStop",
+    "scope": "Laboratorio con registros sintéticos, sin personas identificables",
+    "academic_risk_assessment": "Uso operativo sin finalidad de alto riesgo identificada; el asistente generativo requiere transparencia",
+    "transparency": "La interfaz informa que las respuestas son generadas por IA a partir del manual",
+    "source": "https://ai-act-service-desk.ec.europa.eu/en/ai-act/faq/what-are-obligations-high-risk-transparency-risk-and-minimal-risk-ai-systems",
+    "risk_basis": "No decide acceso a empleo, crédito, salud ni servicios esenciales",
+    "human_control": "Las promociones simuladas del registro requieren aprobación explícita; un operador puede detener los flows de Prefect y bloquear el trigger",
+    "limits": "La evaluación académica debe revisarse si cambia la finalidad o el entorno de uso"
+  }
+}

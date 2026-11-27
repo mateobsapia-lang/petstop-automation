@@ -1,0 +1,16 @@
+{
+  "app_url": "https://petstop-mateo-sapia.streamlit.app/",
+  "repository": "https://github.com/mateobsapia-lang/petstop-automation",
+  "provider": "Streamlit Community Cloud",
+  "python": "3.12.16",
+  "pyarrow": "24.0.0",
+  "guest_session": true,
+  "question": "¿Cuánto tiempo se guarda una reserva confirmada?",
+  "answer": "24 horas",
+  "source": "manual-1",
+  "agent_metrics": {
+    "f1": 0.8269230769230769,
+    "roc_auc": 0.9707613814756672
+  },
+  "submission_status": "Preparado, sin enviar al campus por fecha futura"
+}

@@ -166,7 +166,9 @@ El POST a `/webhook/petstop-review` genera un correo si la confianza es menor a 
 
 ### Publicación
 
-La aplicación funciona localmente con Docker. La publicación cloud y la comprobación de su URL pública siguen pendientes. No se presenta la dirección local como una aplicación publicada.
+Aplicación pública: https://petstop-mateo-sapia.streamlit.app/
+
+Se verificaron una consulta al manual y la consulta de métricas del agente desde una sesión sin iniciar sesión en Streamlit. La ejecución usa Streamlit Community Cloud; el entorno Docker Compose queda disponible para reproducirla localmente.
 
 Fuentes: [Qwen GGUF](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF), [Docker Spaces](https://huggingface.co/docs/hub/spaces-sdks-docker), [criterios de riesgo y transparencia](https://ai-act-service-desk.ec.europa.eu/en/ai-act/faq/what-are-obligations-high-risk-transparency-risk-and-minimal-risk-ai-systems).
 
@@ -198,6 +200,21 @@ Configuración:
 - Python: `3.12`
 - Dependencias: `community/requirements.txt` y `packages.txt`
 
-La entrada se probó en Linux con límite de 2.500 MB y 2 CPU: entrenamiento, cinco inferencias FINISHED y consulta de métricas desde la interfaz. La publicación y la comprobación del enlace externo siguen pendientes. El primer inicio tarda mientras se descargan el binario y el modelo. Los archivos locales del proveedor pueden perderse en un reinicio; la persistencia entre reinicios verificada con volúmenes corresponde al perfil Docker Compose.
+La entrada se probó en Linux con límite de 2.500 MB y 2 CPU: entrenamiento, cinco inferencias FINISHED y consulta de métricas desde la interfaz. La aplicación quedó publicada y se comprobó su acceso sin sesión, la respuesta de reserva de 24 horas y las métricas del agente (f1=0,826923; roc_auc=0,970761). El primer inicio tarda mientras se descargan el binario y el modelo. Los archivos locales del proveedor pueden perderse en un reinicio; la persistencia entre reinicios verificada con volúmenes corresponde al perfil Docker Compose.
 
 Referencia: https://docs.streamlit.io/deploy/streamlit-community-cloud
+
+
+### Evidencias y entregables
+
+- [Consulta pública sin sesión](docs/publicacion/cloud_consulta_sin_sesion.png)
+- [Agente público sin sesión](docs/publicacion/cloud_agente_sin_sesion.png)
+- [Informe del motor de inferencia](docs/checkpoints/5/checkpoint_langchain_motor_Mateo_Sapia.json)
+- [Informe multiagente](docs/checkpoints/7/Checkpoint_Multiagente_Mateo_Sapia.pdf)
+- [Informe Docker](docs/checkpoints/9/Checkpoint_Docker_Mateo_Sapia.pdf)
+- [Informe de observabilidad](docs/checkpoints/10/Checkpoint_Observabilidad_Mateo_Sapia.pdf)
+- [Datos de observabilidad y auditoría](docs/checkpoints/10/checkpoint_observabilidad_Mateo_Sapia.json)
+
+El despliegue se configuró con Python 3.12. El proveedor sustituyó PyArrow 26.0.1 por 24.0.0; se fija esa misma versión en el archivo de dependencias. La verificación pública se realizó con 24.0.0.
+
+El servicio gratuito puede entrar en reposo y necesita unos minutos para volver a preparar el modelo. El historial cloud se guarda en disco local del proveedor y puede reiniciarse al reconstruir la aplicación. La prueba de persistencia con volúmenes del checkpoint 9 corresponde a Docker Compose. No se contrató un plan pago ni se cargaron claves de proveedores de inferencia.
